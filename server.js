@@ -68,10 +68,10 @@ app.delete("/api/sites/:id", (req, res) => {
     .catch(err => res.status(500).json({ message: err.message }));
 });
 
-// Export the app after MongoDB connection (for Vercel)
+// Vercel-compatible export logic
 let isConnected = false;
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (!isConnected) {
     try {
       console.log("Connecting to MongoDB...");
@@ -79,11 +79,12 @@ module.exports = async (req, res) => {
       isConnected = true;
       console.log("MongoDB connected.");
     } catch (err) {
-      console.error("Failed to connect to MongoDB:", err);
-      res.status(500).json({ error: "DB connection error" });
-      return;
+      console.error("MongoDB connection error:", err.message);
+      return res.status(500).json({ error: "DB connection failed" });
     }
   }
 
-  return app(req, res); // Let Vercel handle routing
+  return app(req, res);
 };
+
+module.exports = handler;
